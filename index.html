@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VetCare Pro | Система напоминаний о визите</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e0f2fe 0%, #f0f9ff 100%);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section with Images */
+        .hero-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 250px;
+            object-fit: contain;
+            border-radius: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .hero-image:hover {
+            transform: scale(1.05);
+        }
+
+        .hero-center {
+            text-align: center;
+        }
+
+        .vet-logo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 1.5rem;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.2);
+            padding: 1rem;
+        }
+
+        .vet-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #0369a1, #0284c7);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #475569;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .header-tagline {
+            display: inline-block;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            margin-top: 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 5px solid;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.total { border-left-color: #0ea5e9; }
+        .stat-card.confirmed { border-left-color: #10b981; }
+        .stat-card.cancelled { border-left-color: #ef4444; }
+        .stat-card.pending { border-left-color: #f59e0b; }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+        }
+
+        .stat-card.total .stat-icon { background: #e0f2fe; }
+        .stat-card.confirmed .stat-icon { background: #d1fae5; }
+        .stat-card.cancelled .stat-icon { background: #fee2e2; }
+        .stat-card.pending .stat-icon { background: #fef3c7; }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+        }
+
+        .stat-info p {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 0.2rem;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+        }
+
+        .form-panel, .list-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #e0f2fe;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #334155;
+            font-size: 0.9rem;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border-radius: 1rem;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+        }
+
+        .danger-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        .danger-btn:hover {
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .success-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .success-btn:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Reminder Cards */
+        .reminder-card {
+            background: white;
+            border-radius: 1.25rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-left: 5px solid #0ea5e9;
+            transition: all 0.3s;
+        }
+
+        .reminder-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .reminder-card.cancelled {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+            opacity: 0.9;
+        }
+
+        .reminder-card.confirmed {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .reminder-card.pending {
+            border-left-color: #f59e0b;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .client-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .pet-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .client-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #0f172a;
+        }
+
+        .pet-name {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.35rem 0.875rem;
+            border-radius: 50px;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .status-badge.confirmed {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .status-badge.cancelled {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .details {
+            font-size: 0.9rem;
+            color: #475569;
+            margin: 0.75rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .small-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            width: auto;
+            margin-top: 0;
+            border-radius: 0.75rem;
+            font-weight: 600;
+        }
+
+        .btn-outline {
+            background: #f1f5f9;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background: #e2e8f0;
+            box-shadow: none;
+        }
+
+        .reminder-note {
+            font-size: 0.8rem;
+            background: #fef9c3;
+            display: inline-block;
+            padding: 0.4rem 0.75rem;
+            border-radius: 0.75rem;
+            margin-top: 0.5rem;
+            color: #854d0e;
+            font-weight: 500;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #94a3b8;
+            padding: 3rem;
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .empty-msg-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            color: #64748b;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .feature-list {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .hero-section {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .hero-image {
+                height: 200px;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 1rem; }
+            .stats-cards { grid-template-columns: 1fr; }
+            .stat-card { padding: 1rem; }
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reminder-card {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+        }
+
+        .urgent {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- Hero Section with Images -->
+    <div class="hero-section">
+        <!-- Left Image - Pets collage -->
+        <img src="6391479145.jpg" alt="Домашние животные" class="hero-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 300%27%3E%3Crect fill=%27%23e0f2fe%27 width=%27400%27 height=%27300%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-family=%27Arial%27 font-size=%2760%27 fill=%27%230ea5e9%27 text-anchor=%27middle%27 dy=%27.3em%27%3E🐾🐕🐈🐦%3C/text%3E%3C/svg%3E'">
+        
+        <!-- Center - Logo and Title -->
+        <div class="hero-center">
+            <div class="vet-logo">
+                <img src="veterinary-clinic-logo-vector.jpg" alt="Логотип ветеринарной клиники" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect fill=%27%230ea5e9%27 width=%27100%27 height=%27100%27 rx=%2720%27/%3E%3Cpath d=%27M50 20 L50 80 M20 50 L80 50%27 stroke=%27white%27 stroke-width=%2712%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2725%27 fill=%27none%27 stroke=%27white%27 stroke-width=%278%27/%3E%3C/svg%3E'">
+            </div>
+            <div class="header">
+                <h1>VetCare Pro</h1>
+                <p>Интеллектуальная система напоминаний о визитах питомцев</p>
+                <div class="header-tagline">🐾 Забота о ваших питомцах 24/7</div>
+            </div>
+        </div>
+
+        <!-- Right Image - Vet team -->
+        <img src="XXL.jpeg" alt="Команда ветеринаров" class="hero-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 300%27%3E%3Crect fill=%27%23f0f9ff%27 width=%27400%27 height=%27300%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-family=%27Arial%27 font-size=%2760%27 fill=%27%230284c7%27 text-anchor=%27middle%27 dy=%27.3em%27%3E👨‍⚕️👩‍⚕️🐈%3C/text%3E%3C/svg%3E'">
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-cards" id="statsPanel">
+        <div class="stat-card total">
+            <div class="stat-icon">📋</div>
+            <div class="stat-info">
+                <h3 id="totalCount">0</h3>
+                <p>Всего записей</p>
+            </div>
+        </div>
+        <div class="stat-card confirmed">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3 id="confirmedCount">0</h3>
+                <p>Подтверждено</p>
+            </div>
+        </div>
+        <div class="stat-card cancelled">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+                <h3 id="cancelledCount">0</h3>
+                <p>Отменено</p>
+            </div>
+        </div>
+        <div class="stat-card pending">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+                <h3 id="pendingCount">0</h3>
+                <p>Ожидают</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard">
+        <!-- Form Panel -->
+        <div class="form-panel">
+            <div class="section-title">
+                <span>🐕</span>
+                <span>Новая запись на приём</span>
+            </div>
+            
+            <div class="form-group">
+                <label>👤 Имя владельца</label>
+                <input type="text" id="clientName" placeholder="Например: Анна Петрова" autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label>🐾 Кличка питомца</label>
+                <input type="text" id="petName" placeholder="Например: Барсик, Шарик" autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label>🐕 Вид животного</label>
+                <select id="petType">
+                    <option value="dog">🐕 Собака</option>
+                    <option value="cat">🐈 Кошка</option>
+                    <option value="bird">🐦 Птица</option>
+                    <option value="rodent">🐹 Грызун</option>
+                    <option value="other">🐰 Другое</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>📞 Телефон</label>
+                <input type="tel" id="clientPhone" placeholder="+7 (999) 123-45-67">
+            </div>
+            
+            <div class="form-group">
+                <label>📅 Дата и время приёма</label>
+                <input type="datetime-local" id="visitDatetime">
+            </div>
+            
+            <div class="form-group">
+                <label>📧 Email (для напоминаний)</label>
+                <input type="email" id="clientEmail" placeholder="owner@example.com">
+            </div>
+
+            <div class="form-group">
+                <label>💉 Цель визита</label>
+                <select id="visitPurpose">
+                    <option value="checkup">🏥 Плановый осмотр</option>
+                    <option value="vaccination">💉 Вакцинация</option>
+                    <option value="treatment">💊 Лечение</option>
+                    <option value="surgery">🔪 Операция</option>
+                    <option value="consultation">💬 Консультация</option>
+                    <option value="other">📋 Другое</option>
+                </select>
+            </div>
+            
+            <button id="addVisitBtn">✨ Создать запись + Активировать напоминание</button>
+            
+            <div style="margin-top: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 1rem; font-size: 0.85rem; color: #0369a1;">
+                <strong>🔔 Авто-напоминания:</strong><br>
+                • За 24 часа до приёма<br>
+                • За 2 часа до приёма<br>
+                • За 30 минут до приёма
+            </div>
+        </div>
+
+        <!-- List Panel -->
+        <div class="list-panel">
+            <div class="section-title">
+                <span>📅</span>
+                <span>Ближайшие визиты питомцев</span>
+            </div>
+            
+            <div id="remindersList" style="max-height: 600px; overflow-y: auto; padding-right: 0.5rem;">
+                <div class="empty-msg">
+                    <span class="empty-msg-icon">🐾</span>
+                    Нет записей. Добавьте первого питомца!<br>
+                    <small>Мы поможем не пропустить важный визит к ветеринару</small>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button id="checkRemindersBtn" class="small-btn" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+                    🔔 Проверить напоминания
+                </button>
+                <button id="clearDemoBtn" class="small-btn danger-btn">
+                    🗑️ Очистить все записи
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <strong>🏥 VetCare Pro — Профессиональная забота о ваших питомцах</strong>
+        <div class="feature-list">
+            <div class="feature-item"> Автоматические напоминания</div>
+            <div class="feature-item">✅ Подтверждение записи</div>
+            <div class="feature-item">📊 Статистика посещений</div>
+            <div class="feature-item">📱 SMS и Email уведомления</div>
+    </footer>
+</div>
+
+<script>
+    // Data structure for veterinary appointments
+    let appointments = [];
+
+    // Load data from localStorage
+    function loadData() {
+        const stored = localStorage.getItem('vetcare_appointments');
+        if(stored) {
+            try {
+                appointments = JSON.parse(stored);
+                appointments = appointments.map(app => {
+                    if(app.reminderSent === undefined) app.reminderSent = false;
+                    if(app.petType === undefined) app.petType = 'dog';
+                    if(app.visitPurpose === undefined) app.visitPurpose = 'checkup';
+                    return app;
+                });
+            } catch(e) { appointments = []; }
+        } else {
+            // Demo data
+            const now = new Date();
+            const future1 = new Date(now.getTime() + 45*60000); // 45 min
+            const future2 = new Date(now.getTime() + 25*3600000); // 25 hours
+            
+            appointments = [
+                {
+                    id: Date.now()+1,
+                    clientName: "Елена Смирнова",
+                    petName: "Барсик",
+                    petType: "cat",
+                    phone: "+7 (901) 111-22-33",
+                    email: "elena@example.com",
+                    visitDateTime: future1.toISOString(),
+                    visitPurpose: "vaccination",
+                    status: "pending",
+                    reminderSent: false
+                },
+                {
+                    id: Date.now()+2,
+                    clientName: "Иван Петров",
+                    petName: "Шарик",
+                    petType: "dog",
+                    phone: "+7 (902) 333-44-55",
+                    email: "ivan@example.com",
+                    visitDateTime: future2.toISOString(),
+                    visitPurpose: "checkup",
+                    status: "confirmed",
+                    reminderSent: false
+                }
+            ];
+            saveToLocal();
+        }
+        renderStatsAndList();
+        startAutoReminderChecker();
+    }
+
+    function saveToLocal() {
+        localStorage.setItem('vetcare_appointments', JSON.stringify(appointments));
+    }
+
+    function renderStatsAndList() {
+        updateStats();
+        renderAppointmentsList();
+    }
+
+    function updateStats() {
+        const total = appointments.length;
+        const confirmed = appointments.filter(a => a.status === 'confirmed').length;
+        const cancelled = appointments.filter(a => a.status === 'cancelled').length;
+        const pending = appointments.filter(a => a.status === 'pending').length;
+        
+        document.getElementById('totalCount').innerText = total;
+        document.getElementById('confirmedCount').innerText = confirmed;
+        document.getElementById('cancelledCount').innerText = cancelled;
+        document.getElementById('pendingCount').innerText = pending;
+    }
+
+    function getPetEmoji(type) {
+        const emojis = {
+            dog: '🐕',
+            cat: '🐈',
+            bird: '🐦',
+            rodent: '🐹',
+            other: '🐾'
+        };
+        return emojis[type] || '🐾';
+    }
+
+    function getPurposeText(purpose) {
+        const purposes = {
+            checkup: 'Плановый осмотр',
+            vaccination: 'Вакцинация',
+            treatment: 'Лечение',
+            surgery: 'Операция',
+            consultation: 'Консультация',
+            other: 'Другое'
+        };
+        return purposes[purpose] || purpose;
+    }
+
+    function sendReminder(appointment, reminderType = 'auto') {
+        if (!appointment || appointment.status === 'cancelled') return false;
+        
+        const visitDate = new Date(appointment.visitDateTime);
+        const petEmoji = getPetEmoji(appointment.petType);
+        const purpose = getPurposeText(appointment.visitPurpose);
+        
+        let message = `🏥 ВЕТЕРИНАРНАЯ КЛИНИКА\n\n`;
+        message += `Уважаемый(ая) ${appointment.clientName}!\n\n`;
+        message += `Напоминаем о визите с питомцем ${petEmoji} ${appointment.petName}\n`;
+        message += `📅 ${visitDate.toLocaleString('ru-RU')}\n`;
+        message += `💉 ${purpose}\n\n`;
+        message += `Пожалуйста, подтвердите или отмените запись.`;
+        
+        if (reminderType === 'auto') {
+            message = `🤖 АВТО-НАПОМИНАНИЕ\n\n${message}`;
+        }
+        
+        console.log(`[Отправлено ${reminderType}] для ${appointment.clientName} (${appointment.phone}): ${message}`);
+        
+        // Show notification
+        alert(`📬 НАПОМИНАНИЕ ОТПРАВЛЕНО\n\n${appointment.clientName}\nПитомец: ${appointment.petName} ${petEmoji}\nТелефон: ${appointment.phone}\n\n${message}`);
+        
+        return true;
+    }
+
+    function checkAndSendAutoReminders() {
+        const now = new Date();
+        let anySent = false;
+        
+        for (let app of appointments) {
+            if (app.status === 'cancelled') continue;
+            
+            const visitTime = new Date(app.visitDateTime);
+            const diffMs = visitTime - now;
+            const diffMinutes = Math.floor(diffMs / 60000);
+            
+            // Send reminder 60 minutes before (±5 min window)
+            if (!app.reminderSent && diffMinutes <= 60 && diffMinutes >= -5 && app.status !== 'cancelled') {
+                sendReminder(app, 'auto');
+                app.reminderSent = true;
+                anySent = true;
+            }
+        }
+        
+        if (anySent) {
+            saveToLocal();
+            renderStatsAndList();
+        }
+    }
+
+    function manualReminderCheck() {
+        checkAndSendAutoReminders();
+        showToast("✅ Проверка напоминаний выполнена!", "success");
+        renderStatsAndList();
+    }
+
+    function addAppointment() {
+        const clientName = document.getElementById('clientName').value.trim();
+        const petName = document.getElementById('petName').value.trim() || "Питомец";
+        const petType = document.getElementById('petType').value;
+        const phone = document.getElementById('clientPhone').value.trim();
+        const email = document.getElementById('clientEmail').value.trim();
+        let datetime = document.getElementById('visitDatetime').value;
+        const visitPurpose = document.getElementById('visitPurpose').value;
+
+        if (!clientName) {
+            alert("⚠️ Введите имя владельца!");
+            return;
+        }
+        if (!datetime) {
+            alert("⚠️ Выберите дату и время приёма!");
+            return;
+        }
+        
+        const visitDateObj = new Date(datetime);
+        if (isNaN(visitDateObj.getTime())) {
+            alert("⚠️ Некорректная дата!");
+            return;
+        }
+        
+        const now = new Date();
+        if (visitDateObj <= now) {
+            if(!confirm("⚠️ Дата приёма уже прошла. Всё равно добавить?")) {
+                return;
+            }
+        }
+
+        const newAppointment = {
+            id: Date.now(),
+            clientName: clientName,
+            petName: petName,
+            petType: petType,
+            phone: phone || "не указан",
+            email: email || "не указан",
+            visitDateTime: visitDateObj.toISOString(),
+            visitPurpose: visitPurpose,
+            status: "pending",
+            reminderSent: false
+        };
+        
+        appointments.push(newAppointment);
+        saveToLocal();
+        renderStatsAndList();
+        
+        // Clear form
+        document.getElementById('clientName').value = '';
+        document.getElementById('petName').value = '';
+        document.getElementById('clientPhone').value = '';
+        document.getElementById('clientEmail').value = '';
+        document.getElementById('visitDatetime').value = '';
+        
+        showToast(`✅ Запись создана для ${petName}! Напоминание придёт за час до приёма.`, "success");
+        
+        setTimeout(() => { checkAndSendAutoReminders(); renderStatsAndList(); }, 50);
+    }
+
+    function confirmAppointment(id) {
+        const appointment = appointments.find(a => a.id === id);
+        if (appointment && appointment.status !== 'cancelled') {
+            appointment.status = 'confirmed';
+            saveToLocal();
+            renderStatsAndList();
+            showToast(`✅ Визит с ${appointment.petName} подтверждён!`, "success");
+            sendReminder(appointment, 'manual-confirm');
+        }
+    }
+
+    function cancelAppointment(id) {
+        const appointment = appointments.find(a => a.id === id);
+        if (appointment && appointment.status !== 'cancelled') {
+            appointment.status = 'cancelled';
+            saveToLocal();
+            renderStatsAndList();
+            showToast(`❌ Запись для ${appointment.petName} отменена`, "error");
+            console.log(`[Уведомление об отмене] для ${appointment.clientName}`);
+        }
+    }
+
+    function deleteAppointment(id) {
+        if (confirm("⚠️ Удалить запись безвозвратно?")) {
+            appointments = appointments.filter(a => a.id !== id);
+            saveToLocal();
+            renderStatsAndList();
+            showToast("🗑️ Запись удалена", "info");
+        }
+    }
+
+    function clearAll() {
+        if (confirm("⚠️ Очистить все записи? Статистика обнулится.")) {
+            appointments = [];
+            saveToLocal();
+            renderStatsAndList();
+            showToast("🗑️ Все записи очищены", "info");
+        }
+    }
+
+    function renderAppointmentsList() {
+        const container = document.getElementById('remindersList');
+        
+        if (!appointments.length) {
+            container.innerHTML = `
+                <div class="empty-msg">
+                    <span class="empty-msg-icon">🐾</span>
+                    Нет записей. Добавьте первого питомца!<br>
+                    <small>Мы поможем не пропустить важный визит к ветеринару</small>
+                </div>`;
+            return;
+        }
+
+        const sorted = [...appointments].sort((a,b) => new Date(a.visitDateTime) - new Date(b.visitDateTime));
+        let html = '';
+        
+        for (let app of sorted) {
+            const visitDate = new Date(app.visitDateTime);
+            const nowDate = new Date();
+            const isPast = (visitDate < nowDate) && (app.status !== 'cancelled');
+            const petEmoji = getPetEmoji(app.petType);
+            const purpose = getPurposeText(app.visitPurpose);
+            
+            const statusClass = app.status === 'confirmed' ? 'confirmed' : 
+                               (app.status === 'cancelled' ? 'cancelled' : 'pending');
+            const statusText = app.status === 'confirmed' ? '✅ Подтверждено' : 
+                              (app.status === 'cancelled' ? '❌ Отменено' : '⏳ Ожидает');
+            
+            const diffMin = Math.floor((visitDate - nowDate) / 60000);
+            let timeHint = '';
+            
+            if (!isPast && app.status !== 'cancelled' && diffMin <= 120 && diffMin > 0) {
+                timeHint = `<div class="reminder-note urgent">⏰ Скоро приём! (через ${diffMin} мин)</div>`;
+            } else if (isPast && app.status === 'pending') {
+                timeHint = `<div class="reminder-note" style="background:#fee2e2; color:#b91c1c;">⚠️ Время приёма прошло</div>`;
+            } else if (app.reminderSent && app.status === 'pending') {
+                timeHint = `<div class="reminder-note">📢 Напоминание отправлено</div>`;
+            }
+
+            html += `
+                <div class="reminder-card ${statusClass}">
+                    <div class="card-header">
+                        <div class="client-info">
+                            <div class="pet-avatar">${petEmoji}</div>
+                            <div>
+                                <div class="client-name">${escapeHtml(app.clientName)}</div>
+                                <div class="pet-name">${petEmoji} ${escapeHtml(app.petName)} • ${purpose}</div>
+                            </div>
+                        </div>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="details">
+                        <div class="detail-item">📞 ${escapeHtml(app.phone)}</div>
+                        <div class="detail-item">📧 ${escapeHtml(app.email)}</div>
+                        <div class="detail-item">🗓️ ${visitDate.toLocaleString('ru-RU')}</div>
+                    </div>
+                    ${timeHint}
+                    <div class="actions">
+                        ${app.status !== 'confirmed' && app.status !== 'cancelled' ? 
+                            `<button class="small-btn success-btn" onclick="confirmAppointment(${app.id})">✅ Подтвердить</button>` : ''}
+                        ${app.status !== 'cancelled' ? 
+                            `<button class="small-btn danger-btn" onclick="cancelAppointment(${app.id})">❌ Отменить</button>` : ''}
+                        <button class="small-btn btn-outline" onclick="deleteAppointment(${app.id})">🗑️ Удалить</button>
+                        <button class="small-btn btn-outline" onclick="manualReminderForOne(${app.id})">🔔 Напомнить</button>
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    window.manualReminderForOne = function(id) {
+        const app = appointments.find(a => a.id === id);
+        if(app && app.status !== 'cancelled') {
+            sendReminder(app, 'Ручная отправка');
+            showToast(`Напоминание для ${app.petName} отправлено`, "success");
+        }
+    };
+
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function showToast(message, type = 'info') {
+        // Simple toast notification
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#0ea5e9'};
+            color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+            font-weight: 600;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'slideIn 0.3s ease-out reverse';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    let intervalId = null;
+    function startAutoReminderChecker() {
+        if(intervalId) clearInterval(intervalId);
+        intervalId = setInterval(() => {
+            checkAndSendAutoReminders();
+            renderStatsAndList();
+        }, 30000);
+    }
+
+    window.onload = () => {
+        loadData();
+        document.getElementById('addVisitBtn').addEventListener('click', addAppointment);
+        document.getElementById('checkRemindersBtn').addEventListener('click', manualReminderCheck);
+        document.getElementById('clearDemoBtn').addEventListener('click', clearAll);
+        
+        window.confirmAppointment = confirmAppointment;
+        window.cancelAppointment = cancelAppointment;
+        window.deleteAppointment = deleteAppointment;
+        
+        setTimeout(() => { checkAndSendAutoReminders(); renderStatsAndList(); }, 200);
+    };
+</script>
+</body>
+</html> 
